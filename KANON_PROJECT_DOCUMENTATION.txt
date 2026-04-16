@@ -1,0 +1,350 @@
+================================================================================
+                    KANON AI — PROJECT DOCUMENTATION
+           AI-Powered Telehealth Platform for Rural South India
+================================================================================
+
+Project Name   : KANON AI Telehealth
+Version        : 3.0.0
+Built By       : PRANAV N
+Date           : April 2026
+Theme          : SDG 3 — Good Health and Well-being
+Target Region  : Rural South India (Karnataka & Tamil Nadu)
+
+================================================================================
+1. WHAT IS KANON?
+================================================================================
+
+KANON is a full-stack AI-powered telehealth platform designed specifically for
+rural communities in South India. The name KANON reflects our mission — bringing
+advanced medical diagnostics to every village, in the patient's own language.
+
+The platform addresses a critical gap: rural patients in Karnataka and Tamil Nadu
+often travel hours to reach a doctor for basic consultations or medical imaging
+analysis. KANON brings that capability directly to them — on any device, in their
+own language (Kannada, Tamil, or English), powered entirely by local AI models
+that work even without a stable internet connection.
+
+================================================================================
+2. PROBLEMS WE SOLVED
+================================================================================
+
+PROBLEM 1 — Language Barrier
+  Rural patients in South India primarily speak Kannada or Tamil. Most medical
+  AI tools only support English, making them inaccessible to the majority.
+
+  SOLUTION: Full trilingual support (English, Kannada, Tamil) across the entire
+  platform — AI doctor chat, voice input, text-to-speech responses, UI labels,
+  and medical reports. The AI doctor responds in whichever language the patient
+  speaks, with hard language locks to prevent mixing.
+
+PROBLEM 2 — No Access to Doctors
+  Rural areas have a severe shortage of qualified physicians. Patients often
+  self-medicate or delay treatment due to distance and cost.
+
+  SOLUTION: Dr. KANON AI — a conversational AI doctor powered by Llama 3.1 (8B)
+  running locally via Ollama. It conducts real medical consultations, asks
+  intelligent follow-up questions (not a rigid checklist), and generates a
+  structured clinical report with differential diagnosis, OTC medications, and
+  home remedies.
+
+PROBLEM 3 — No Medical Imaging Analysis
+  Chest X-rays and ultrasounds require specialist radiologists who are rarely
+  available in rural areas. Reports take days or weeks.
+
+  SOLUTION: Integrated MedMO-4B-Next vision model running on GPU (RTX 3050 Ti,
+  4-bit quantized to fit in 4GB VRAM). Analyzes chest X-rays for TB, pneumonia,
+  and other conditions. Analyzes obstetric ultrasounds for fetal biometry and
+  anomalies. Reports are generated in seconds and formatted by Ollama into
+  professional hospital-grade reports.
+
+PROBLEM 4 — ECG Analysis Inaccessible
+  ECG interpretation requires a cardiologist. Rural health centers often have
+  ECG machines but no one to read the output.
+
+  SOLUTION: Built a custom ECG analysis engine using signal processing (scipy,
+  numpy, OpenCV). Accepts ECG images or raw signal data. Detects STEMI, ischemia,
+  atrial fibrillation, bundle branch block, tachycardia, and bradycardia.
+  Generates color-coded condition cards and a full clinical report.
+
+PROBLEM 5 — No Health Records
+  Rural patients have no persistent health records. Each visit starts from zero.
+
+  SOLUTION: MongoDB Atlas cloud EHR. Every consultation, X-ray, ultrasound, and
+  ECG analysis is saved to the patient's account. Full history accessible from
+  any device. Filter by type, view full reports, download PDFs.
+
+PROBLEM 6 — Voice Accessibility
+  Many rural patients are not comfortable typing. Literacy levels vary.
+
+  SOLUTION: Full voice consultation system. Patient speaks → audio recorded in
+  browser → sent to backend → Google STT transcribes in correct language →
+  doctor responds → gTTS generates audio in Kannada/Tamil/English → plays back.
+  Hands-free loop mode available.
+
+PROBLEM 7 — Generic AI Responses
+  Most medical chatbots give the same canned responses regardless of what the
+  patient says. They follow rigid checklists.
+
+  SOLUTION: Rewrote the system prompt to make the AI listen first and extract
+  information from what the patient says, only asking about things NOT already
+  mentioned. The AI adapts to the conversation like a real doctor.
+
+================================================================================
+3. WHAT WE BUILT — FULL FEATURE LIST
+================================================================================
+
+FRONTEND (index.html — Single Page Application)
+  ✅ Homepage with hero section, how-it-works, language banner
+  ✅ Full authentication — Register/Login with phone + password (hashed)
+  ✅ Dashboard with health score, recent activity, quick actions
+  ✅ AI Symptom Chat — conversational doctor interface
+  ✅ X-Ray Analysis — upload image → GPU analysis → formatted report
+  ✅ Ultrasound Analysis — obstetric/abdominal scan analysis
+  ✅ ECG Analysis — image or raw signal → cardiac condition detection
+  ✅ Health Score — animated donut ring, risk level, trend
+  ✅ Cloud EHR — full history with filter tabs, report viewer, PDF download
+  ✅ Remedies — AI-generated from latest consultation/scan
+  ✅ Section chatbots — ask questions about any specific report
+  ✅ Voice Mode — full two-way voice consultation (STT + TTS)
+  ✅ Multilingual — English, Kannada, Tamil (every label, button, placeholder)
+  ✅ Language selector in navbar AND dashboard sidebar
+  ✅ Dark sidebar with glassmorphism main content
+  ✅ Animated health ring, staggered card animations, button ripples
+  ✅ System status dots (AI online/offline, DB connected/disconnected)
+  ✅ PDF report download (html2canvas + jsPDF, multi-page)
+  ✅ Save to EHR button on every report and consultation
+
+BACKEND (main.py — FastAPI)
+  ✅ /app                    — serves index.html (enables voice API)
+  ✅ /auth/register          — create account with hashed password
+  ✅ /auth/login             — authenticate with phone + password
+  ✅ /ollama/chat            — conversational doctor (Ollama llama3.1:8b)
+  ✅ /analyze/xray           — X-ray analysis (MedMO-4B + Ollama formatting)
+  ✅ /analyze/ultrasound     — ultrasound analysis
+  ✅ /analyze/ecg            — ECG analysis (custom signal processing engine)
+  ✅ /speech/transcribe      — audio → text (Google STT via speechrecognition)
+  ✅ /tts                    — text → audio (gTTS, supports kn/ta/en)
+  ✅ /ask                    — section-specific chatbot with report context
+  ✅ /user/{id}/dashboard    — load patient dashboard from Atlas
+  ✅ /user/{id}/history      — full EHR history
+  ✅ /user/{id}/save-consultation — save consultation to Atlas
+  ✅ /user/{id}/save-scan    — save scan report to Atlas
+  ✅ /health                 — system health check
+  ✅ /ollama/status          — check if Ollama is running
+
+AI MODELS USED
+  1. Llama 3.1 (8B) via Ollama
+     - Doctor consultation AI
+     - Report formatting (X-ray, ultrasound, ECG)
+     - Section chatbots
+     - Runs 100% locally, no API key needed
+     - Language: English, Kannada, Tamil
+
+  2. MedMO-4B-Next (MBZUAI)
+     - Medical vision model for X-ray and ultrasound analysis
+     - Runs on RTX 3050 Ti GPU (4-bit quantized, 2.71 GB VRAM)
+     - Framework: Qwen3-VL architecture
+
+  3. Custom ECG Engine
+     - Built from scratch using scipy, numpy, OpenCV
+     - Pan-Tompkins R-peak detection
+     - Bandpass filtering (0.5–40 Hz)
+     - HRV analysis (SDNN, RMSSD)
+     - ST segment analysis
+     - Detects: STEMI, Ischemia, AFib, BBB, Tachycardia, Bradycardia
+
+  4. gTTS (Google Text-to-Speech)
+     - Multilingual TTS for voice responses
+     - Supports Kannada (kn), Tamil (ta), English (en)
+     - Runs via backend, no browser voice dependency
+
+  5. Google Speech Recognition
+     - STT via speechrecognition Python library
+     - Language codes: en-IN, kn-IN, ta-IN
+     - Audio converted from WebM to WAV via ffmpeg
+
+DATABASE
+  - MongoDB Atlas (cloud)
+  - Collections: users, consultations, scan_reports, health_scores
+  - Auto-saves every consultation and scan when user is logged in
+  - Graceful degradation — app works without DB
+
+================================================================================
+4. TECHNICAL ARCHITECTURE
+================================================================================
+
+  [Browser / Mobile]
+       |
+       | HTTP (same WiFi for mobile)
+       |
+  [FastAPI Backend — port 8001]
+       |
+       |── [Ollama — port 11434]  ← llama3.1:8b (doctor AI)
+       |── [MedMO-4B-Next]        ← GPU (RTX 3050 Ti, CUDA 12.4)
+       |── [ECG Engine]           ← scipy + numpy + OpenCV
+       |── [gTTS]                 ← multilingual TTS
+       |── [Google STT]           ← speech recognition
+       |── [MongoDB Atlas]        ← cloud database
+       |── [ffmpeg]               ← audio conversion
+
+Hardware Used:
+  - CPU: Intel/AMD (any modern)
+  - GPU: NVIDIA RTX 3050 Ti Laptop (4 GB VRAM)
+  - CUDA: 12.4
+  - RAM: 16 GB recommended
+  - OS: Windows 11
+
+Key Libraries:
+  - fastapi, uvicorn          — web framework
+  - httpx                     — async HTTP client
+  - pymongo[srv]              — MongoDB driver
+  - transformers, torch       — vision model
+  - bitsandbytes, accelerate  — 4-bit quantization
+  - qwen-vl-utils             — vision model utilities
+  - scipy, numpy, opencv-python — ECG signal processing
+  - scikit-learn              — ML utilities
+  - speechrecognition, pyaudio — STT
+  - gtts                      — TTS
+  - python-dotenv             — environment config
+  - pydub                     — audio processing
+
+================================================================================
+5. HOW TO RUN
+================================================================================
+
+Prerequisites:
+  1. Python 3.11+
+  2. NVIDIA GPU with CUDA (for vision model)
+  3. Ollama installed (https://ollama.com/download)
+  4. ffmpeg installed
+
+Setup:
+  pip install fastapi uvicorn httpx pymongo python-dotenv
+  pip install transformers torch bitsandbytes accelerate qwen-vl-utils
+  pip install scipy numpy opencv-python scikit-learn
+  pip install speechrecognition pyaudio gtts pydub
+  pip install "pymongo[srv]"
+
+  ollama pull llama3.1:8b
+
+Configure .env:
+  MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/
+  MONGODB_DB=kanon_ai
+  OLLAMA_MODEL=llama3.1:8b
+  OLLAMA_URL=http://localhost:11434
+
+Run:
+  ollama serve          (in one terminal)
+  python main.py        (in another terminal)
+
+Open:
+  http://localhost:8001/app
+
+Voice (optional):
+  python voice_doctor.py
+
+================================================================================
+6. CHALLENGES FACED & HOW WE SOLVED THEM
+================================================================================
+
+CHALLENGE 1 — Model Loading on Limited VRAM
+  MedMO-4B-Next is a 9.65 GB model. RTX 3050 Ti only has 4 GB VRAM.
+  SOLUTION: 4-bit NF4 quantization using bitsandbytes. Reduced to 2.71 GB.
+  Model loads in ~20 seconds from cache.
+
+CHALLENGE 2 — Model Hallucination (Repeating Sentences)
+  The vision model was repeating "No evidence of pulmonary tuberculosis" 58 times.
+  SOLUTION: Added repetition_penalty=1.3, no_repeat_ngram_size=5, do_sample=False
+  (greedy decoding). Also added post-processing to remove duplicate sentences.
+
+CHALLENGE 3 — Malformed JSON from Vision Model
+  Model output JSON with typos (impresison, recomendaciones), unquoted keys,
+  escaped quotes inside strings, extra closing braces.
+  SOLUTION: Switched from JSON output to structured plain text format. Model
+  now outputs section headers (FINDINGS:, IMPRESSION:, etc.) which are parsed
+  reliably. Ollama then reformats into a professional hospital report.
+
+CHALLENGE 4 — Language Mixing in AI Doctor
+  llama3.1:8b would mix Kannada and Tamil, or switch to English mid-conversation.
+  SOLUTION: Hard language lock in system prompt with CRITICAL INSTRUCTION prefix,
+  repeated 3 ways. Every user message prefixed with language reminder in the
+  target script ([ಕನ್ನಡದಲ್ಲಿ ಮಾತ್ರ ಉತ್ತರಿಸಿ]).
+
+CHALLENGE 5 — Voice TTS Not Working for Kannada/Tamil
+  Browser Web Speech API (SpeechSynthesis) requires OS-installed voices.
+  Windows doesn't ship with Kannada or Tamil voices.
+  SOLUTION: Moved TTS to backend using gTTS library which supports kn/ta/en
+  natively. Audio generated as MP3, streamed to browser, played via Audio API.
+
+CHALLENGE 6 — Web Speech API Network Error
+  Browser's SpeechRecognition API throws "network error" on file:// URLs.
+  SOLUTION: Backend serves index.html at http://localhost:8001/app so the
+  app runs on http:// protocol. Also added MediaRecorder → backend STT pipeline
+  as fallback (records WebM audio, converts to WAV via ffmpeg, sends to Google STT).
+
+CHALLENGE 7 — AI Doctor Asking Dumb Repetitive Questions
+  The old prompt had a rigid checklist: "gather in this order: chief complaint
+  → duration → severity → character → aggravating factors..."
+  The model would ask "how long have you had fever?" even when the patient
+  already said "fever for 3 days".
+  SOLUTION: Rewrote prompt to say "Listen carefully. Extract as much as possible
+  from each message. Ask ONLY about things NOT already told. Do NOT follow a
+  rigid checklist."
+
+CHALLENGE 8 — MongoDB Datetime Not JSON Serializable
+  Python datetime objects from MongoDB couldn't be serialized to JSON.
+  SOLUTION: Added .isoformat() conversion for all datetime fields before
+  returning from API endpoints.
+
+CHALLENGE 9 — Numpy Bool/Float64 Not JSON Serializable
+  ECG engine returned numpy.bool_ and numpy.float64 types which FastAPI
+  couldn't serialize.
+  SOLUTION: Explicit casting — bool(), float(), round() on all numpy values
+  before returning from the ECG analysis endpoint.
+
+CHALLENGE 10 — Duplicate SVG Gradient IDs
+  Two instances of the KANON logo SVG on the same page used the same gradient
+  ID "kg", causing one to render incorrectly.
+  SOLUTION: Assigned unique IDs (kg1, kg2) to each gradient definition.
+
+================================================================================
+7. IMPACT & USE CASE
+================================================================================
+
+Target Users:
+  - Rural patients in Karnataka and Tamil Nadu
+  - ASHA workers and community health volunteers
+  - Primary Health Centre (PHC) staff
+  - Patients who speak Kannada or Tamil as first language
+
+Real-World Impact:
+  - Reduces need to travel to district hospitals for basic consultations
+  - Provides instant X-ray and ECG analysis where radiologists are unavailable
+  - Generates professional medical reports that can be shared with doctors
+  - Works offline (Ollama + vision model run locally, no internet needed)
+  - Saves patient history in cloud EHR for continuity of care
+  - Voice interface makes it accessible to patients with low literacy
+
+Alignment with SDG 3:
+  - Good Health and Well-being
+  - Universal health coverage
+  - Reduce maternal and child mortality (ultrasound analysis)
+  - Combat communicable diseases (TB screening in X-ray)
+  - Strengthen health systems in underserved areas
+
+================================================================================
+8. FUTURE ROADMAP
+================================================================================
+
+  → Mobile app (React Native) — already scaffolded, connects to same backend
+  → Telemedicine video call integration with real doctors
+  → Prescription generation and pharmacy integration
+  → Integration with Ayushman Bharat / ABHA health ID
+  → Offline-first PWA for areas with no internet
+  → Support for more languages (Telugu, Malayalam, Hindi)
+  → Wearable device integration (ECG patches, pulse oximeters)
+  → Government PHC dashboard for population health monitoring
+
+================================================================================
+                        END OF DOCUMENTATION
+================================================================================
